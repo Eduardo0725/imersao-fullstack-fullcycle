@@ -3,8 +3,9 @@ package model
 import (
 	"errors"
 	"time"
-	uuid "github.com/satori/go.uuid"
+
 	"github.com/asaskevich/govalidator"
+	uuid "github.com/satori/go.uuid"
 )
 
 type PixKeyRepositoryInterface interface {
@@ -16,10 +17,10 @@ type PixKeyRepositoryInterface interface {
 }
 
 type PixKey struct {
-	Base 	  `valid:"required"`
-	Kind 	  string   `json:"kind" valid:"notnull"`
-	Key 	  string   `json:"key" valid:"notnull"`
-	AccountID string   `json:"account_id" valid:"notnull"`
+	Base      `valid:"required"`
+	Kind      string   `json:"kind" valid:"notnull"`
+	Key       string   `json:"key" valid:"notnull"`
+	AccountID string   `gorm:"column:account_id;type:uuid;not null" valid:"-"`
 	Account   *Account `valid:"-"`
 	Status    string   `json:"status" valid:"notnull"`
 }
@@ -58,4 +59,3 @@ func NewPixKey(kind string, account *Account, key string) (*PixKey, error) {
 
 	return &pixkey, nil
 }
-

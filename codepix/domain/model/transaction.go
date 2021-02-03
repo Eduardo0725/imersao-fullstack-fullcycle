@@ -3,14 +3,15 @@ package model
 import (
 	"errors"
 	"time"
-	uuid "github.com/satori/go.uuid"
+
 	"github.com/asaskevich/govalidator"
-) 
+	uuid "github.com/satori/go.uuid"
+)
 
 const (
-	TransactionPending string = "pending"
+	TransactionPending   string = "pending"
 	TransactionCompleted string = "completed"
-	TransactionError string = "error"
+	TransactionError     string = "error"
 	TransactionConfirmed string = "confirmed"
 )
 
@@ -25,15 +26,16 @@ type Transactions struct {
 }
 
 type Transaction struct {
-	Base 			  `valid:"required"`
-	AccountFrom 	  *Account `valid:"-"`
-	Amount 			  float64  `json:"amount" valid:"notnull"`
-	PixKeyTo 		  *PixKey  `valid:"-"`
-	Status 			  string   `json:"status" valid:"notnull"`
-	Description 	  string   `json:"description" valid:"notnull"`
-	CancelDescription string   `json:"cancel_description" valid:"-"`
+	Base              `valid:"required"`
+	AccountFrom       *Account `valid:"-"`
+	AccountFromID     string   `gorm:"column:account_from_id;type:uuid;" valid:"notnull"`
+	Amount            float64  `json:"amount" gorm:"type:float" valid:"notnull"`
+	PixKeyTo          *PixKey  `valid:"-"`
+	PixKeyIdTo        string   `gorm:"column:pix_key_id_to;type:uuid;" valid:"notnull"`
+	Status            string   `json:"status" gorm:"varchar(20)" valid:"notnull"`
+	Description       string   `json:"description" gorm:"varchar(255)" valid:"-"`
+	CancelDescription string   `json:"cancel_description" gorm:"varchar(255)" valid:"-"`
 }
-
 
 func (t *Transaction) isValid() error {
 	_, err := govalidator.ValidateStruct(t)
@@ -59,9 +61,9 @@ func (t *Transaction) isValid() error {
 func NewTransaction(accountFrom *Account, amount float64, pixKeyTo *PixKey, description string) (*Transaction, error) {
 	transaction := Transaction{
 		AccountFrom: accountFrom,
-		Amount: 	 amount,
-		PixKeyTo: 	 pixKeyTo,
-		Status: 	 TransactionPending,
+		Amount:      amount,
+		PixKeyTo:    pixKeyTo,
+		Status:      TransactionPending,
 		Description: description,
 	}
 	transaction.ID = uuid.NewV4().String()
@@ -96,4 +98,3 @@ func (t *Transaction) Cancel(description string) error {
 	err := t.isValid()
 	return err
 }
-
